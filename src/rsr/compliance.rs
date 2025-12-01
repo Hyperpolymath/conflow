@@ -14,7 +14,7 @@ use super::requirements::{
 };
 
 /// Compliance level based on requirements met
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum ComplianceLevel {
     /// No compliance - mandatory requirements not met
     NonCompliant,

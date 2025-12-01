@@ -152,6 +152,86 @@ impl RsrSchemaRegistry {
                 tags: vec!["kubernetes".into(), "k8s".into()],
             },
         );
+
+        // Terraform schema
+        self.schemas.insert(
+            "terraform:variables".into(),
+            SchemaDefinition {
+                id: "terraform:variables".into(),
+                schema_type: SchemaType::Cue,
+                name: "Terraform Variables Schema".into(),
+                description: "Schema for Terraform variable definitions".into(),
+                source: SchemaSource::Inline {
+                    content: TERRAFORM_SCHEMA.into(),
+                },
+                version: "1.0.0".into(),
+                tags: vec!["terraform".into(), "iac".into()],
+            },
+        );
+
+        // Helm Values schema
+        self.schemas.insert(
+            "helm:values".into(),
+            SchemaDefinition {
+                id: "helm:values".into(),
+                schema_type: SchemaType::Cue,
+                name: "Helm Values Schema".into(),
+                description: "Schema for Helm chart values.yaml files".into(),
+                source: SchemaSource::Inline {
+                    content: HELM_VALUES_SCHEMA.into(),
+                },
+                version: "1.0.0".into(),
+                tags: vec!["helm".into(), "kubernetes".into()],
+            },
+        );
+
+        // Docker Compose schema
+        self.schemas.insert(
+            "docker:compose".into(),
+            SchemaDefinition {
+                id: "docker:compose".into(),
+                schema_type: SchemaType::Cue,
+                name: "Docker Compose Schema".into(),
+                description: "Schema for docker-compose.yaml files".into(),
+                source: SchemaSource::Inline {
+                    content: DOCKER_COMPOSE_SCHEMA.into(),
+                },
+                version: "1.0.0".into(),
+                tags: vec!["docker".into(), "compose".into()],
+            },
+        );
+
+        // GitHub Actions schema
+        self.schemas.insert(
+            "github:actions".into(),
+            SchemaDefinition {
+                id: "github:actions".into(),
+                schema_type: SchemaType::Cue,
+                name: "GitHub Actions Schema".into(),
+                description: "Schema for GitHub Actions workflow files".into(),
+                source: SchemaSource::Inline {
+                    content: GITHUB_ACTIONS_SCHEMA.into(),
+                },
+                version: "1.0.0".into(),
+                tags: vec!["github".into(), "ci".into()],
+            },
+        );
+
+        // AWS CloudFormation schema
+        self.schemas.insert(
+            "aws:cloudformation".into(),
+            SchemaDefinition {
+                id: "aws:cloudformation".into(),
+                schema_type: SchemaType::Cue,
+                name: "AWS CloudFormation Schema".into(),
+                description: "Schema for CloudFormation templates".into(),
+                source: SchemaSource::Inline {
+                    content: CLOUDFORMATION_SCHEMA.into(),
+                },
+                version: "1.0.0".into(),
+                tags: vec!["aws".into(), "cloudformation".into(), "iac".into()],
+            },
+        );
     }
 
     /// Get a schema by ID
@@ -440,6 +520,444 @@ package k8s
         cpu?:    string
         memory?: string
     }
+}
+"#;
+
+const TERRAFORM_SCHEMA: &str = r#"
+// Terraform Variables Schema
+package terraform
+
+#Variables: {
+    // AWS/Cloud region
+    region?: string
+
+    // Environment
+    environment: "dev" | "staging" | "prod"
+
+    // Instance type
+    instance_type?: string | *"t3.micro"
+
+    // Enable monitoring
+    monitoring?: bool | *true
+
+    // Tags
+    tags?: [string]: string
+}
+
+#Backend: {
+    bucket:         string
+    key:            string
+    region:         string
+    encrypt?:       bool | *true
+    dynamodb_table?: string
+}
+
+#Provider: {
+    source:  string
+    version: string
+}
+"#;
+
+const HELM_VALUES_SCHEMA: &str = r#"
+// Helm Values Schema
+package helm
+
+#Values: {
+    // Replica count
+    replicaCount?: int & >=0 | *1
+
+    // Image configuration
+    image?: {
+        repository: string
+        tag?:       string | *"latest"
+        pullPolicy?: "Always" | "IfNotPresent" | "Never" | *"IfNotPresent"
+    }
+
+    // Image pull secrets
+    imagePullSecrets?: [...{name: string}]
+
+    // Service account
+    serviceAccount?: {
+        create?: bool | *true
+        annotations?: [string]: string
+        name?: string
+    }
+
+    // Service configuration
+    service?: {
+        type?: "ClusterIP" | "NodePort" | "LoadBalancer" | *"ClusterIP"
+        port?: int & >=1 & <=65535 | *80
+    }
+
+    // Ingress configuration
+    ingress?: {
+        enabled?: bool | *false
+        className?: string
+        annotations?: [string]: string
+        hosts?: [...{
+            host: string
+            paths?: [...{
+                path: string
+                pathType?: "Prefix" | "Exact" | "ImplementationSpecific"
+            }]
+        }]
+        tls?: [...{
+            secretName: string
+            hosts: [...string]
+        }]
+    }
+
+    // Resource limits
+    resources?: {
+        limits?: {
+            cpu?:    string
+            memory?: string
+        }
+        requests?: {
+            cpu?:    string
+            memory?: string
+        }
+    }
+
+    // Autoscaling
+    autoscaling?: {
+        enabled?: bool | *false
+        minReplicas?: int & >=1
+        maxReplicas?: int & >=1
+        targetCPUUtilizationPercentage?: int & >=1 & <=100
+    }
+}
+"#;
+
+const DOCKER_COMPOSE_SCHEMA: &str = r#"
+// Docker Compose Schema
+package compose
+
+#Compose: {
+    version?: string
+    services: [string]: #Service
+    volumes?: [string]: #Volume | null
+    networks?: [string]: #Network | null
+    configs?: [string]: #Config
+    secrets?: [string]: #Secret
+}
+
+#Service: {
+    image?:       string
+    build?:       string | #Build
+    container_name?: string
+    command?:     string | [...string]
+    entrypoint?:  string | [...string]
+    ports?:       [...string | #Port]
+    expose?:      [...(string | int)]
+    environment?: [...string] | {[string]: string | null}
+    env_file?:    string | [...string]
+    volumes?:     [...string | #VolumeMount]
+    depends_on?:  [...string] | {[string]: #DependsOn}
+    networks?:    [...string] | {[string]: #NetworkConfig | null}
+    restart?:     "no" | "always" | "on-failure" | "unless-stopped"
+    healthcheck?: #Healthcheck
+    deploy?:      #Deploy
+    labels?:      [...string] | {[string]: string}
+    logging?:     #Logging
+    extra_hosts?: [...string]
+    dns?:         string | [...string]
+    working_dir?: string
+    user?:        string
+    privileged?:  bool
+    stdin_open?:  bool
+    tty?:         bool
+}
+
+#Build: {
+    context:    string
+    dockerfile?: string
+    args?:      [...string] | {[string]: string}
+    target?:    string
+    cache_from?: [...string]
+}
+
+#Port: {
+    target:    int
+    published?: int | string
+    protocol?:  "tcp" | "udp"
+    mode?:     "host" | "ingress"
+}
+
+#VolumeMount: {
+    type:     "volume" | "bind" | "tmpfs"
+    source:   string
+    target:   string
+    read_only?: bool
+}
+
+#DependsOn: {
+    condition: "service_started" | "service_healthy" | "service_completed_successfully"
+}
+
+#NetworkConfig: {
+    aliases?: [...string]
+    ipv4_address?: string
+}
+
+#Healthcheck: {
+    test:        [...string]
+    interval?:   string
+    timeout?:    string
+    retries?:    int
+    start_period?: string
+}
+
+#Deploy: {
+    replicas?: int
+    resources?: {
+        limits?: {
+            cpus?: string
+            memory?: string
+        }
+        reservations?: {
+            cpus?: string
+            memory?: string
+        }
+    }
+    restart_policy?: {
+        condition?: "none" | "on-failure" | "any"
+        delay?:     string
+        max_attempts?: int
+        window?:    string
+    }
+}
+
+#Logging: {
+    driver: string
+    options?: [string]: string
+}
+
+#Volume: {
+    driver?: string
+    driver_opts?: [string]: string
+    external?: bool
+    labels?: [string]: string
+    name?: string
+}
+
+#Network: {
+    driver?: string
+    driver_opts?: [string]: string
+    external?: bool
+    internal?: bool
+    labels?: [string]: string
+    name?: string
+}
+
+#Config: {
+    file?: string
+    external?: bool
+    name?: string
+}
+
+#Secret: {
+    file?: string
+    external?: bool
+    name?: string
+}
+"#;
+
+const GITHUB_ACTIONS_SCHEMA: &str = r#"
+// GitHub Actions Workflow Schema
+package github
+
+#Workflow: {
+    name?: string
+
+    on: #Trigger | [...#Event] | {[#Event]: #TriggerConfig | null}
+
+    env?: [string]: string
+
+    defaults?: {
+        run?: {
+            shell?: string
+            working-directory?: string
+        }
+    }
+
+    concurrency?: string | {
+        group: string
+        cancel-in-progress?: bool
+    }
+
+    jobs: [string]: #Job
+}
+
+#Event: "push" | "pull_request" | "workflow_dispatch" | "schedule" |
+        "release" | "issues" | "issue_comment" | "create" | "delete" |
+        "fork" | "watch" | "workflow_call" | "repository_dispatch"
+
+#Trigger: #Event | [...#Event]
+
+#TriggerConfig: {
+    branches?: [...string]
+    branches-ignore?: [...string]
+    paths?: [...string]
+    paths-ignore?: [...string]
+    tags?: [...string]
+    tags-ignore?: [...string]
+    types?: [...string]
+}
+
+#Job: {
+    name?: string
+    needs?: string | [...string]
+    runs-on: string | [...string]
+
+    if?: string
+
+    permissions?: "read-all" | "write-all" | {
+        actions?: #Permission
+        contents?: #Permission
+        deployments?: #Permission
+        issues?: #Permission
+        packages?: #Permission
+        pull-requests?: #Permission
+        security-events?: #Permission
+        statuses?: #Permission
+    }
+
+    environment?: string | {
+        name: string
+        url?: string
+    }
+
+    concurrency?: string | {
+        group: string
+        cancel-in-progress?: bool
+    }
+
+    outputs?: [string]: string
+
+    env?: [string]: string
+
+    defaults?: {
+        run?: {
+            shell?: string
+            working-directory?: string
+        }
+    }
+
+    strategy?: {
+        matrix?: [string]: [...] | {
+            include?: [...{[string]: _}]
+            exclude?: [...{[string]: _}]
+            [string]: [...]
+        }
+        fail-fast?: bool
+        max-parallel?: int
+    }
+
+    continue-on-error?: bool
+
+    container?: string | #Container
+
+    services?: [string]: #Container
+
+    steps: [...#Step]
+}
+
+#Permission: "read" | "write" | "none"
+
+#Step: {
+    id?: string
+    if?: string
+    name?: string
+    uses?: string
+    run?: string
+    shell?: string
+    with?: [string]: _
+    env?: [string]: string
+    continue-on-error?: bool
+    timeout-minutes?: number
+    working-directory?: string
+}
+
+#Container: {
+    image: string
+    credentials?: {
+        username: string
+        password: string
+    }
+    env?: [string]: string
+    ports?: [...(int | string)]
+    volumes?: [...string]
+    options?: string
+}
+"#;
+
+const CLOUDFORMATION_SCHEMA: &str = r#"
+// AWS CloudFormation Template Schema
+package cloudformation
+
+#Template: {
+    AWSTemplateFormatVersion?: "2010-09-09"
+    Description?: string
+
+    Metadata?: [string]: _
+
+    Parameters?: [string]: #Parameter
+
+    Mappings?: [string]: [string]: [string]: string
+
+    Conditions?: [string]: _
+
+    Transform?: string | [...string]
+
+    Resources: [string]: #Resource
+
+    Outputs?: [string]: #Output
+}
+
+#Parameter: {
+    Type: "String" | "Number" | "List<Number>" | "CommaDelimitedList" |
+          "AWS::SSM::Parameter::Name" | "AWS::SSM::Parameter::Value<String>" |
+          "AWS::EC2::AvailabilityZone::Name" | "AWS::EC2::Image::Id" |
+          "AWS::EC2::Instance::Id" | "AWS::EC2::KeyPair::KeyName" |
+          "AWS::EC2::SecurityGroup::GroupName" | "AWS::EC2::SecurityGroup::Id" |
+          "AWS::EC2::Subnet::Id" | "AWS::EC2::VPC::Id" |
+          "List<AWS::EC2::AvailabilityZone::Name>" | "List<AWS::EC2::Image::Id>" |
+          "List<AWS::EC2::Instance::Id>" | "List<AWS::EC2::SecurityGroup::GroupName>" |
+          "List<AWS::EC2::SecurityGroup::Id>" | "List<AWS::EC2::Subnet::Id>" |
+          "List<AWS::EC2::VPC::Id>"
+
+    Default?: _
+    Description?: string
+    AllowedPattern?: string
+    AllowedValues?: [...]
+    ConstraintDescription?: string
+    MaxLength?: int
+    MinLength?: int
+    MaxValue?: number
+    MinValue?: number
+    NoEcho?: bool
+}
+
+#Resource: {
+    Type: string
+    Properties?: [string]: _
+    DependsOn?: string | [...string]
+    Condition?: string
+    CreationPolicy?: _
+    DeletionPolicy?: "Delete" | "Retain" | "Snapshot"
+    UpdatePolicy?: _
+    UpdateReplacePolicy?: "Delete" | "Retain" | "Snapshot"
+    Metadata?: [string]: _
+}
+
+#Output: {
+    Value: _
+    Description?: string
+    Export?: {
+        Name: _
+    }
+    Condition?: string
 }
 "#;
 
