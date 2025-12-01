@@ -1,0 +1,10 @@
+{
+  "name": "my-app",
+  "replicas": 3,
+  "port": 8080,
+  "env": "dev",
+  "resources": {
+    "cpu": "100m",
+    "memory": "256Mi"
+  }
+}

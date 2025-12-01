@@ -1,0 +1,59 @@
+# Multi-environment configuration example
+# Generates separate configs for dev, staging, and prod
+
+version: "1"
+name: "multi-environment"
+description: "Generate and validate environment-specific configurations"
+
+stages:
+  - name: "generate-dev"
+    description: "Generate development configuration"
+    tool:
+      type: nickel
+      command: export
+      file: environments/dev.ncl
+      format: json
+    input: "environments/dev.ncl"
+    output:
+      path: generated/dev.json
+      format: json
+
+  - name: "generate-staging"
+    description: "Generate staging configuration"
+    tool:
+      type: nickel
+      command: export
+      file: environments/staging.ncl
+      format: json
+    input: "environments/staging.ncl"
+    output:
+      path: generated/staging.json
+      format: json
+
+  - name: "generate-prod"
+    description: "Generate production configuration"
+    tool:
+      type: nickel
+      command: export
+      file: environments/prod.ncl
+      format: json
+    input: "environments/prod.ncl"
+    output:
+      path: generated/prod.json
+      format: json
+
+  - name: "validate-all"
+    description: "Validate all environment configurations"
+    tool:
+      type: cue
+      command: vet
+      schemas:
+        - schemas/environment.cue
+    input:
+      - generated/dev.json
+      - generated/staging.json
+      - generated/prod.json
+    depends_on:
+      - generate-dev
+      - generate-staging
+      - generate-prod

@@ -1,0 +1,30 @@
+# Nickel generation example
+# Generates configuration from Nickel source
+
+version: "1"
+name: "nickel-generation"
+
+stages:
+  - name: "generate"
+    description: "Generate configuration from Nickel"
+    tool:
+      type: nickel
+      command: export
+      file: config.ncl
+      format: json
+    input: "config.ncl"
+    output:
+      path: generated/config.json
+      format: json
+
+  - name: "validate"
+    description: "Validate generated configuration"
+    tool:
+      type: cue
+      command: vet
+      schemas:
+        - schema.cue
+    input:
+      from_stage: generate
+    depends_on:
+      - generate

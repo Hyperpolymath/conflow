@@ -1,0 +1,64 @@
+# Full pipeline example
+# Generate → Validate → Export
+
+version: "1"
+name: "full-pipeline"
+description: "Complete pipeline demonstrating Nickel generation, CUE validation, and export"
+
+stages:
+  - name: "generate"
+    description: "Generate configuration using Nickel"
+    tool:
+      type: nickel
+      command: export
+      file: src/config.ncl
+      format: json
+    input: "src/config.ncl"
+    output:
+      path: build/config.json
+      format: json
+
+  - name: "validate"
+    description: "Validate against CUE schema"
+    tool:
+      type: cue
+      command: vet
+      schemas:
+        - schemas/config.cue
+    input:
+      from_stage: generate
+    depends_on:
+      - generate
+
+  - name: "export-yaml"
+    description: "Export as YAML for deployment"
+    tool:
+      type: cue
+      command: export
+      out_format: yaml
+    input:
+      from_stage: generate
+    output:
+      path: deploy/config.yaml
+      format: yaml
+    depends_on:
+      - validate
+
+  - name: "export-toml"
+    description: "Export as TOML for application"
+    tool:
+      type: cue
+      command: export
+      out_format: toml
+    input:
+      from_stage: generate
+    output:
+      path: deploy/config.toml
+      format: toml
+    depends_on:
+      - validate
+
+cache:
+  enabled: true
+  directory: .conflow/cache
+  invalidation: content_hash

@@ -1,0 +1,15 @@
+# Simple CUE validation example
+# Validates JSON config files against a CUE schema
+
+version: "1"
+name: "simple-validation"
+
+stages:
+  - name: "validate"
+    description: "Validate configuration files against schema"
+    tool:
+      type: cue
+      command: vet
+      schemas:
+        - schema.cue
+    input: "*.json"
