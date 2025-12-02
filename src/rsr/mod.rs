@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (c) 2025 conflow contributors
+
 //! RSR (Rhodium Standard Repository) Integration
 //!
 //! This module provides integration between conflow and the RSR ecosystem,

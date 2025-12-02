@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (c) 2025 conflow contributors
+
 //! RSR Configuration loading
 //!
 //! Load org-specific requirements and configuration from .rsr.yaml

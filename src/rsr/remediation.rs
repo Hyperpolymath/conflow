@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (c) 2025 conflow contributors
+
 //! Auto-remediation for RSR requirements
 //!
 //! Automatically fixes failing requirements where possible.

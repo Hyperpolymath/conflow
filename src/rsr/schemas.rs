@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+// Copyright (c) 2025 conflow contributors
+
 //! RSR Schema Registry
 //!
 //! Provides access to RSR schemas for validation and generation.
