@@ -51,9 +51,6 @@ glob = "0.3"
 # Regex
 regex = "1.10"
 
-# Date/Time
-chrono = { version = "0.4", features = ["serde"] }
-
 # Path handling
 directories = "5.0"
 

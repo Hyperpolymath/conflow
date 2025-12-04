@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright (c) 2025 conflow contributors
-
 //! RSR Compliance checking
 //!
 //! Checks project compliance with RSR requirements and generates reports.
@@ -17,7 +14,7 @@ use super::requirements::{
 };
 
 /// Compliance level based on requirements met
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ComplianceLevel {
     /// No compliance - mandatory requirements not met
     NonCompliant,

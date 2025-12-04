@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright (c) 2025 conflow contributors
-
 //! RSR Hooks - Integration points for RSR validator
 //!
 //! Provides hooks that RSR validator can use to trigger conflow operations

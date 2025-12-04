@@ -1,6 +1,3 @@
-// SPDX-License-Identifier: MIT OR Apache-2.0
-// Copyright (c) 2025 conflow contributors
-
 //! RSR command - RSR integration and compliance checking
 
 use colored::Colorize;
